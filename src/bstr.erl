@@ -1,10 +1,10 @@
 %%%-------------------------------------------------------------------
 %%% @author Juan Jose Comellas <juanjo@comellas.org>
 %%% @author Mahesh Paolini-Subramanya <mahesh@aptela.com>
-%%% @copyright (C) 2008-2010, Juan Jose Comellas.
+%%% @copyright (C) 2008-2011, Juan Jose Comellas.
+%%% @copyright (C) 2008-2011, Mahesh Paolini-Subramanya.
 %%% @doc String implemented over an Erlang binary.
 %%% @end
-%%%
 %%% This source file is subject to the New BSD License. You should have received
 %%% a copy of the New BSD license with this software. If not, it can be
 %%% retrieved from: http://www.opensource.org/licenses/bsd-license.php
@@ -183,20 +183,20 @@ is_xdigit(Char) when is_integer(Char) ->
 -spec is_blank(binary()) -> boolean().
 is_blank(<<>>) ->
     false;
-is_blank(Str) when is_binary(Str) ->
-    is_x(Str, fun char:is_blank/1);
 is_blank(Char) when is_integer(Char) ->
-    char:is_blank(Char).
+    char:is_blank(Char);
+is_blank(Str) ->
+    is_x(Str, fun char:is_blank/1).
 
 
 %% @doc Determines if a string is composed of spaces or tabs.
 -spec is_space(binary()) -> boolean().
 is_space(<<>>) ->
     false;
-is_space(Str) when is_binary(Str) ->
-    is_x(Str, fun char:is_space/1);
 is_space(Char) when is_integer(Char) ->
-    char:is_space(Char).
+    char:is_space(Char);
+is_space(Str) ->
+    is_x(Str, fun char:is_space/1).
 
 
 %% @doc Determines if a string is an unquoted atom.
@@ -233,17 +233,17 @@ is_numeric_sign(_Str) ->
 is_numeric_digits(<<Char, Tail/binary>>) when (Char >= $0 andalso Char =< $9) ->
     is_numeric_digits(Tail);
 is_numeric_digits(<<Char, Tail/binary>>) when Char =:= $. ->
-    is_numeric_decimals(first, Tail);
+    is_numeric_decimals(Tail, first);
 is_numeric_digits(<<_Char, _Tail/binary>>) ->
     false;
 is_numeric_digits(<<>>) ->
     true.
 
-is_numeric_decimals(_Stage, <<Char, Tail/binary>>) when (Char >= $0 andalso Char =< $9) ->
-    is_numeric_decimals(second, Tail);
-is_numeric_decimals(second, <<>>) ->
+is_numeric_decimals(<<Char, Tail/binary>>, _Stage) when (Char >= $0 andalso Char =< $9) ->
+    is_numeric_decimals(Tail, second);
+is_numeric_decimals(<<>>, second) ->
     true;
-is_numeric_decimals(_Stage, _Str) ->
+is_numeric_decimals(_Str, _Stage) ->
     false.
 
 
@@ -307,9 +307,9 @@ duplicate(_Str, _Num, Acc) ->
 
 %% @doc Return a substring starting at position 'Pos'.
 -spec substr(binary(), integer()) -> binary().
-substr(Str, 1) when is_binary(Str) ->
+substr(Str, 1) ->
     Str;
-substr(Str, Pos) when is_binary(Str) ->
+substr(Str, Pos) ->
     N = Pos - 1,
     case Str of
         <<_Head:N/binary, Substr/binary>> ->
@@ -338,9 +338,9 @@ substr(Str, Pos, Len) when is_binary(Str) ->
 %%      string. If the string does not have enough characters, the original
 %%      string is returned.
 -spec left(binary(), integer()) -> binary().
-left(Str, Len) when is_binary(Str), Len >= size(Str) ->
+left(Str, Len) when Len >= size(Str) ->
     Str;
-left(Str, Len) when is_binary(Str), Len >= 0 ->
+left(Str, Len) when Len >= 0 ->
     <<Left:Len/binary, _Tail/binary>> = Str,
     Left.
 
@@ -349,9 +349,9 @@ left(Str, Len) when is_binary(Str), Len >= 0 ->
 %%      If the string does not have enough characters, the original string is
 %%      returned.
 -spec right(binary(), integer()) -> binary().
-right(Str, Len) when is_binary(Str), Len >= size(Str) ->
+right(Str, Len) when Len >= size(Str) ->
     Str;
-right(Str, Len) when is_binary(Str), Len >= 0 ->
+right(Str, Len) when Len >= 0 ->
     Offset = size(Str) - Len,
     <<_Head:Offset/binary, Right/binary>> = Str,
     Right.
@@ -359,12 +359,12 @@ right(Str, Len) when is_binary(Str), Len >= 0 ->
 
 %% @doc Return a string of 'Len' bytes padded with spaces to the left and to the right.
 -spec pad(binary(), non_neg_integer()) -> binary().
-pad(Str, Len) when is_binary(Str), Len >= 0 ->
+pad(Str, Len) when Len >= 0 ->
     pad(Str, Len, $\s).
 
 %% @doc Return a string of 'Len' bytes padded with 'Chars' to the left and to the right.
 -spec pad(binary(), integer(), char()) -> binary().
-pad(Str, Len, Char) when is_binary(Str), Len >= 0 ->
+pad(Str, Len, Char) when Len >= 0 ->
     PadLen = Len - size(Str),
     if
         PadLen > 0 ->
@@ -389,12 +389,12 @@ pad(Str, Len, Char) when is_binary(Str), Len >= 0 ->
 
 %% @doc Return a string of 'Len' bytes left-padded with spaces.
 -spec lpad(binary(), non_neg_integer()) -> binary().
-lpad(Str, Len) when is_binary(Str), Len >= 0 ->
+lpad(Str, Len) when Len >= 0 ->
     lpad(Str, Len, $\s).
 
 %% @doc Return a string of 'Len' bytes left-padded with 'Chars'.
 -spec lpad(binary(), non_neg_integer(), char()) -> binary().
-lpad(Str, Len, Char) when is_binary(Str), Len >= 0 ->
+lpad(Str, Len, Char) when Len >= 0 ->
     PadLen = Len - size(Str),
     if
         PadLen > 0 ->
@@ -407,7 +407,7 @@ lpad(Str, Len, Char) when is_binary(Str), Len >= 0 ->
 
 %% @doc Return a string of 'Len' bytes right-padded with spaces.
 -spec rpad(binary(), non_neg_integer()) -> binary().
-rpad(Str, Len) when is_binary(Str), Len >= 0 ->
+rpad(Str, Len) when Len >= 0 ->
     rpad(Str, Len, $\s).
 
 %% @doc Return a string of 'Len' bytes right-padded with 'Chars'.
@@ -430,20 +430,20 @@ strip(Str) when is_binary(Str) ->
 
 %% @doc Remove all the 'Chars' present both to the left and to the right of the string.
 -spec strip(binary(), char()) -> binary().
-strip(Str, Char) when is_binary(Str) andalso (is_integer(Char) orelse is_binary(Char)) ->
+strip(Str, Char) ->
     rstrip(lstrip(Str, Char), Char).
 
 
 %% @doc Remove all the spaces present to the left of the string.
 -spec lstrip(binary()) -> binary().
-lstrip(Str) when is_binary(Str) ->
+lstrip(Str) ->
     lstrip(Str, <<"\s\t\n\r\f\v">>).
 
 %% @doc Remove all the 'Chars' present to the left of the string.
 -spec lstrip(binary(), char() | binary()) -> binary().
-lstrip(Str, Char) when is_binary(Str), is_integer(Char) ->
+lstrip(Str, Char) when is_integer(Char) ->
     lstrip_char(Str, Char);
-lstrip(Str, Chars) when is_binary(Str), is_binary(Chars) ->
+lstrip(Str, Chars) when is_binary(Chars) ->
     lstrip_bin(Str, Chars).
 
 %% @hidden
@@ -466,63 +466,52 @@ lstrip_bin(Str, _Chars) ->
 
 %% @doc Remove all the spaces present to the right of the string.
 -spec rstrip(binary()) -> binary().
-rstrip(Str) when is_binary(Str) ->
+rstrip(Str) ->
     rstrip(Str, <<"\s\t\n\r\f\v">>).
 
 %% @doc Remove all the 'Chars' present to the right of the string.
 -spec rstrip(binary(), char() | binary()) -> binary().
-rstrip(Str, Char) when is_binary(Str), is_integer(Char) ->
+rstrip(Str, Char) when is_integer(Char) ->
     rstrip_char(Str, Char, size(Str) - 1);
-rstrip(Str, Chars) when is_binary(Str), is_binary(Chars) ->
+rstrip(Str, Chars) ->
     rstrip_bin(Str, Chars, size(Str) - 1).
 
 %% @hidden
 rstrip_char(Str, Char, Pos) ->
     case Str of
-        <<_Head:Pos/binary, Char, _Tail/binary>> ->
-            rstrip_char(Str, Char, Pos - 1);
-        <<_Head:Pos/binary, _Tail/binary>> ->
-            N = Pos + 1,
-            <<Stripped:N/binary, _Dummy/binary>> = Str,
-            Stripped;
+        <<Head:Pos/binary, Char>> ->
+            rstrip_char(Head, Char, Pos - 1);
         _ ->
-            <<>>
+            Str
     end.
 
 %% @hidden
 rstrip_bin(Str, Chars, Pos) ->
     case Str of
-        <<_Head:Pos/binary, Char, _Tail/binary>> ->
+        <<Head:Pos/binary, Char>> ->
             case member(Chars, Char) of
                 true ->
-                    rstrip_bin(Str, Chars, Pos - 1);
+                    rstrip_bin(Head, Chars, Pos - 1);
                 _ ->
-                    N = Pos + 1,
-                    <<Stripped:N/binary, _Dummy/binary>> = Str,
-                    Stripped
+                    Str
             end;
 
         _ ->
-            <<>>
+            Str
     end.
 
 
 %% @doc Remove all the newlines (\r and \n) present at the end of the string.
 -spec chomp(binary()) -> binary().
-chomp(Str) when is_binary(Str) ->
+chomp(Str) ->
     chomp(Str, size(Str) - 1).
+
 chomp(Str, Pos) ->
     case Str of
-        <<_Head:Pos/binary, $\n, _Tail/binary>> ->
-            chomp(Str, Pos - 1);
-        <<_Head:Pos/binary, $\r, _Tail/binary>> ->
-            chomp(Str, Pos - 1);
-        <<_Head:Pos/binary, _Tail/binary>> ->
-            N = Pos + 1,
-            <<Stripped:N/binary, _Whitespace/binary>> = Str,
-            Stripped;
+        <<Head:Pos/binary, Char>> when Char =:= $\r; Char =:= $\n ->
+            chomp(Head, Pos - 1);
         _ ->
-            <<>>
+            Str
     end.
 
 
@@ -531,45 +520,38 @@ chomp(Str, Pos) ->
 -spec split(binary(), Sep::char() | binary()) -> list(binary()).
 split(<<>>, _Sep) ->
     [];
-split(Str, Sep) when is_binary(Str), is_integer(Sep) ->
-    lists:reverse(split_char_sep(Str, Sep, 0, []));
-split(Str, Sep) when is_binary(Str), is_binary(Sep) ->
+split(Str, Sep) when is_integer(Sep) ->
+    lists:reverse(split_char_sep(Str, <<>>, Sep, []));
+split(Str, Sep)  ->
     Tokens =
         case Sep of
             <<Char>> ->
-                split_char_sep(Str, Char, 0, []);
+                split_char_sep(Str, <<>>, Char, []);
             _ ->
-                split_str_sep(Str, Sep, 0, [])
+                split_str_sep(Str, <<>>, Sep, [])
         end,
     lists:reverse(Tokens).
 
 %% @doc Helper function used to tokenize a string when the separator is a character.
 -spec split_char_sep(binary(), char(), integer(), [binary()]) -> [binary()].
-split_char_sep(Str, Sep, Pos, Tokens) ->
-    case Str of
-        <<Token:Pos/binary, Sep, Tail/binary>> ->
-            split_char_sep(Tail, Sep, 0, [Token | Tokens]);
-        <<_Head:Pos/binary, _Tail/binary>> ->
-            split_char_sep(Str, Sep, Pos + 1, Tokens);
-        _ ->
-            [Str | Tokens]
-    end.
+split_char_sep(<<Sep, Tail/binary>>, TokenAcc, Sep, Tokens) ->
+    split_char_sep(Tail, <<>>, Sep, [TokenAcc | Tokens]);
+split_char_sep(<<Char, Tail/binary>>, TokenAcc, Sep, Tokens) ->
+    split_char_sep(Tail, <<TokenAcc/binary, Char>>, Sep, Tokens);
+split_char_sep(<<>>, TokenAcc, _Sep, Tokens) ->
+    [TokenAcc | Tokens].
 
 %% @doc Helper function used to tokenize a string when there are multiple separators.
--spec split_str_sep(binary(), binary(), non_neg_integer(), [binary()]) -> [binary(),...].
-split_str_sep(Str, Sep, Pos, Tokens) ->
-    case Str of
-        <<Token:Pos/binary, Char, Tail/binary>> ->
-            Index = index(Sep, Char),
-            if
-                Index >= 0 ->
-                    split_str_sep(Tail, Sep, 0, [Token | Tokens]);
-                true ->
-                    split_str_sep(Str, Sep, Pos + 1, Tokens)
-            end;
-        _ ->
-            [Str|Tokens]
-    end.
+-spec split_str_sep(binary(), binary(), binary(), [binary()]) -> [binary(),...].
+split_str_sep(<<Char, Tail/binary>>, TokenAcc, Sep, Tokens) ->
+    case member(Sep, Char) of
+        true ->
+            split_str_sep(Tail, <<>>, Sep, [TokenAcc | Tokens]);
+        false ->
+            split_str_sep(Tail, <<TokenAcc/binary, Char>>, Sep, Tokens)
+    end;
+split_str_sep(<<>>, TokenAcc, _Sep, Tokens) ->
+    [TokenAcc | Tokens].
 
 
 %% @doc Join a a list of strings into one string.
@@ -668,126 +650,96 @@ join(Members, Sep, Esc) ->
                 end, Members),
       Sep).
 
-%% @doc Convert all the characters in a bstr to lowercase.
+%% @doc Convert all the characters in a binary to lowercase.
 -spec lower(binary() | char()) -> binary() | char().
-lower(Str) when is_binary(Str) ->
-    lower_nocopy(Str, 0);
 lower(Char) when is_integer(Char) ->
     case char:is_upper(Char) of
         true ->
             Char - $A + $a;
         false ->
             Char
-    end.
+    end;
+lower(Str) ->
+    lower(Str, <<>>).
 
-%% The first part scans the string to see if it finds an upper-case character.
-%% If it finds one, it then switches to the version of the function that copies
-%% each character.
-lower_nocopy(Str, N) ->
-    case Str of
-        <<Head:N/binary, Char, Tail/binary>> ->
-            case char:is_upper(Char) of
-                true ->
-                    Lower = Char - $A + $a,
-                    lower_copy(Tail, [Lower, Head]);
-                false ->
-                    lower_nocopy(Str, N + 1)
-            end;
-        _ ->
-            Str
-    end.
-%% This part accumulates each of the characters in a list.
-lower_copy(<<Char, Tail/binary>>, Acc) ->
+lower(<<Char, Tail/binary>>, Acc) ->
     case char:is_upper(Char) of
         true ->
-            lower_copy(Tail, [(Char - $A + $a) | Acc]);
+            Lower = Char - $A + $a,
+            lower(Tail, <<Acc/binary, Lower>>);
         false ->
-            lower_copy(Tail, [Char | Acc])
+            lower(Tail, <<Acc/binary, Char>>)
     end;
-lower_copy(<<>>, Acc) ->
-    list_to_binary(lists:reverse(Acc)).
+lower(<<>>, Acc) ->
+    Acc.
 
 
-%% @doc Convert all the characters in a bstr to uppercase.
+%% @doc Convert all the characters in a binary to uppercase.
 -spec upper(binary() | char()) -> binary() | char().
-upper(Str) when is_binary(Str) ->
-    upper_nocopy(Str, 0);
 upper(Char) when is_integer(Char) ->
     case char:is_lower(Char) of
         true ->
             Char - $a + $A;
         false ->
             Char
-    end.
-%% The first part scans the string to see if it finds a lower-case character.
-%% If it finds one, it then switches to the version of the function that copies
-%% each character.
-upper_nocopy(Str, N) ->
-    case Str of
-        <<Head:N/binary, Char, Tail/binary>> ->
-            case char:is_lower(Char) of
-                true ->
-                    Upper = Char - $a + $A,
-                    upper_copy(Tail, [Upper, Head]);
-                false ->
-                    upper_nocopy(Str, N + 1)
-            end;
-        _ ->
-            Str
-    end.
-%% This part accumulates each of the characters in a list.
-upper_copy(<<Char, Tail/binary>>, Acc) ->
+    end;
+upper(Str) ->
+    upper(Str, <<>>).
+
+upper(<<Char, Tail/binary>>, Acc) ->
     case char:is_lower(Char) of
         true ->
-            upper_copy(Tail, [(Char - $a + $A) | Acc]);
+            Upper = Char - $a + $A,
+            upper(Tail, <<Acc/binary, Upper>>);
         false ->
-            upper_copy(Tail, [Char | Acc])
+            upper(Tail, <<Acc/binary, Char>>)
     end;
-upper_copy(<<>>, Acc) ->
-    list_to_binary(lists:reverse(Acc)).
+upper(<<>>, Acc) ->
+    Acc.
 
 
-
-%% @doc Convert an "object" to a bstr.
+%% @doc Convert an "object" to a binary.
 -spec bstr(binary() | atom() | list() | char()) -> binary().
 bstr(Bin) when is_binary(Bin) ->
     Bin;
 bstr(Pid) when is_pid(Pid) ->
     list_to_binary(pid_to_list(Pid));
 bstr(Atom) when is_atom(Atom) ->
-    list_to_binary(atom_to_list(Atom));
-bstr(Integer) when is_integer(Integer) ->
+    from_atom(Atom);
+bstr(Integer) when is_integer(Integer), Integer > 0, Integer =< 255 ->
     <<Integer>>;
+bstr(Integer) when is_integer(Integer) ->
+    from_integer(Integer);
 bstr(List) when is_list(List) ->
     list_to_binary(List).
 
 
 %% @doc Convert an atom to a bstr.
 -spec from_atom(atom()) -> binary().
-from_atom(Atom) when is_atom(Atom) ->
-    list_to_binary(atom_to_list(Atom)).
+from_atom(Atom) ->
+    atom_to_binary(Atom, utf8).
 
 %% @doc Convert a bstr containing a string to an Erlang atom.
 -spec to_atom(binary()) -> atom().
-to_atom(Str) when is_binary(Str) ->
-    list_to_atom(binary_to_list(Str)).
+to_atom(Str) ->
+    binary_to_atom(Str, utf8).
 
 %% @doc Convert a bstr containing a string to an Erlang atom only if the atom
 %%      already existed (i.e. had been previously defined).
 -spec to_existing_atom(binary()) -> atom().
-to_existing_atom(Str) when is_binary(Str) ->
-    list_to_existing_atom(binary_to_list(Str)).
+to_existing_atom(Str) ->
+    binary_to_existing_atom(Str, utf8).
 
 
 %% @doc Convert a list containing a string to a binary.
 -spec from_list(list()) -> binary().
-from_list(List) when is_list(List) ->
+from_list(List) ->
     list_to_binary(List).
 
 
 %% @doc Convert a bstr containing a string to an Erlang list/string.
 -spec to_list(binary()) -> [byte()].
-to_list(Str) when is_binary(Str) ->
+to_list(Str) ->
     binary_to_list(Str).
 
 
@@ -811,8 +763,8 @@ from_integer(I, Base) ->
     from_integer(I, Base, upper).
 
 %% @doc Convert an integer to a bstr in base 'n' format in the specified case.
--spec from_integer(integer(), 1..255, upper | lower) -> binary().
-from_integer(I, Base, Case) when is_integer(I), is_integer(Base), Base >= 2, Base =< 1 + $Z - $A + 10 ->
+-spec from_integer(integer(), 2..36, upper | lower) -> binary().
+from_integer(I, Base, Case) when is_integer(I), is_integer(Base), Base >= 2, Base =< $Z - $A + 11 ->
     BaseLetter = case Case of
                      upper ->
                          $A;
@@ -857,25 +809,23 @@ from_integer(I0, Base, BaseLetter, Acc) ->
 %%      to an integer.
 -spec to_integer(binary()) -> integer().
 to_integer(<<$-, Str/binary>>) ->
-    -to_decimal_integer(Str, 0, 0);
+    -to_decimal_integer(Str, 0);
 to_integer(<<$+, Str/binary>>) ->
-    to_decimal_integer(Str, 0, 0);
+    to_decimal_integer(Str, 0);
 to_integer(<<>>) ->
-    erlang:error(badarg, [<<>>]);
-to_integer(Str) when is_binary(Str) ->
-    to_decimal_integer(Str, 0, 0).
+    erlang:error(badarg);
+to_integer(Str) ->
+    to_decimal_integer(Str, 0).
+
 %% Part of the function converts the string into a base-10 number
-to_decimal_integer(Str, Offset, Acc) ->
-    case Str of
-        <<_Head:Offset/binary, Char, _Tail/binary>> when (Char >= $0) and (Char =< $9) ->
-            to_decimal_integer(Str, Offset + 1, Acc * 10 + (Char - $0));
-        <<_Head:Offset/binary>> ->
-            Acc;
-        _Number ->
-            %% We throw the same exception thrown by list_to_integer() if a
-            %% non-numeric character is found
-            erlang:error(badarg, [Str])
-    end.
+to_decimal_integer(<<Char, Tail/binary>>, Acc) when (Char >= $0) and (Char =< $9) ->
+    to_decimal_integer(Tail, Acc * 10 + (Char - $0));
+to_decimal_integer(<<Char, _Tail/binary>>, _Acc) ->
+    %% We throw the same exception thrown by list_to_integer() if a
+    %% non-numeric character is found
+    erlang:error(badarg, [Char]);
+to_decimal_integer(<<>>, Acc) ->
+    Acc.
 
 
 %% @doc Convert a bstr containing a string representing a positive number
@@ -885,49 +835,31 @@ to_decimal_integer(Str, Offset, Acc) ->
 -spec to_integer(binary(), 1..255) -> integer().
 to_integer(Str, 10) ->
     to_integer(Str);
-to_integer(Str, Base) when is_integer(Base), Base >= 2, Base =< 1 + $Z - $A + 10 ->
-    case Str of
-        <<$-, Number/binary>> ->
-            -to_base_n_integer(Number, 0, Base, 0);
-        <<$+, Number/binary>> ->
-            to_base_n_integer(Number, 0, Base, 0);
-        <<>> ->
-            erlang:error(badarg, [<<>>]);
-        Number ->
-            to_base_n_integer(Number, 0, Base, 0)
-    end;
+to_integer(_Str, Base) when not is_integer(Base); Base < 2; Base > ($Z - $A + 11) ->
+    erlang:error(badarg, [Base]);
+to_integer(<<$-, Tail/binary>>, Base) ->
+    -to_base_n_integer(Tail, Base, 0);
+to_integer(<<$+, Tail/binary>>, Base) ->
+    to_base_n_integer(Tail, Base, 0);
+to_integer(<<>>, _Base) ->
+    erlang:error(badarg);
 to_integer(Str, Base) ->
-    erlang:error(badarg, [Str, Base]).
+    to_base_n_integer(Str, Base, 0).
+
+
 % Generic version for the rest of the bases
-to_base_n_integer(Str, Offset, Base, Acc) ->
-    case Str of
-        <<_Head:Offset/binary, Char, _Tail/binary>> ->
-            N =
-                if
-                    (Char >= $0) and (Char =< $9) and (Char < Base + $0) ->
-                        (Char - $0);
-                    (Char >= $A) and (Char =< $Z) and (Char < Base + $A) ->
-                        10 + (Char - $A);
-                    (Char >= $a) and (Char =< $z) and (Char < Base + $a) ->
-                        10 + (Char - $a);
-                    true ->
-                        %% We throw the same exception thrown by list_to_integer() if an
-                        %% invalid character is found
-                        erlang:error(badarg, [Str, Base]),
-                        %% To avoid compiler warning
-                        0
-                end,
-            to_base_n_integer(Str, Offset + 1, Base, Acc * Base + N);
-
-        <<_Head:Offset/binary>> ->
-            Acc;
-
-        _Number ->
-            %% We throw the same exception thrown by list_to_integer() if a
-            %% non-numeric character is found
-            erlang:error(badarg, [Str])
-    end.
-
+to_base_n_integer(<<Char, Tail/binary>>, Base, Acc) when Char >= $0, Char =< $9, Char < Base + $0 ->
+    to_base_n_integer(Tail, Base, Acc * Base + Char - $0);
+to_base_n_integer(<<Char, Tail/binary>>, Base, Acc) when Char >= $A, Char =< $Z, Char < Base + $A ->
+    to_base_n_integer(Tail, Base, Acc * Base + 10 + Char - $A);
+to_base_n_integer(<<Char, Tail/binary>>, Base, Acc) when Char >= $a, Char =< $z, Char < Base + $a ->
+    to_base_n_integer(Tail, Base, Acc * Base + 10 + Char - $a);
+to_base_n_integer(<<>>, _Base, Acc) ->
+    Acc;
+to_base_n_integer(<<Char, _Tail/binary>>, Base, _Acc) ->
+    %% We throw the same exception thrown by list_to_integer() if an
+    %% invalid character is found
+    erlang:error(badarg, [Char, Base]).
 
 %% @doc Convert a floating point number to a bstr.
 -spec from_float(float()) -> binary().
@@ -966,57 +898,38 @@ to_number(Str) ->
 %%      the last element.
 -spec get_line(binary()) -> {binary(), binary()}.
 get_line(Str) ->
-    get_line(Str, 0).
-get_line(Str, Offset) ->
-    case Str of
-        <<Line:Offset/binary, $\n, Tail/binary>> ->
-            {Line, Tail};
-        <<Line:Offset/binary, $\r, $\n, Tail/binary>> ->
-            {Line, Tail};
-        Line when Offset >= size(Line) ->
-            {Str, <<>>};
-        _ ->
-            get_line(Str, Offset + 1)
-    end.
+    get_line(Str, <<>>).
+
+get_line(<<$\n, Tail/binary>>, Acc) ->
+    {Acc, Tail};
+get_line(<<$\r, $\n, Tail/binary>>, Acc) ->
+    {Acc, Tail};
+get_line(<<Char, Tail/binary>>, Acc) ->
+    get_line(Tail, <<Acc/binary, Char>>);
+get_line(<<>>, Acc) ->
+    {Acc, <<>>}.
 
 
 %% @doc Encode a bstr using the URL-encoding scheme.
 -spec urlencode(binary()) -> binary().
-urlencode(Str) when is_binary(Str) ->
-    urlencode(Str, 0).
-%% This part of the function iterates over the bstr without copying any data
-%% and once it finds a character that has to be URL-encoded it switches to
-%% the version of the function that accumulates the converted bstr.
-urlencode(Str, N) ->
-    case Str of
-        <<Head:N/binary, Char, _Tail/binary>> ->
-            case is_urlencoded(Char) of
-                true ->
-                    Hi = integer_to_hex_char((Char band 16#f0) bsr 4),
-                    Lo = integer_to_hex_char((Char band 16#0f)),
-                    urlencode(Str, N + 1, [Lo, Hi, $%, Head]);
+urlencode(Str) ->
+    urlencode(Str, <<>>).
 
-                false ->
-                    urlencode(Str, N + 1)
-            end;
-        _ ->
-            Str
-    end.
-urlencode(Str, N, Acc) ->
-    case Str of
-        <<_Head:N/binary, Char, _Tail/binary>> ->
-            case is_urlencoded(Char) of
-                true ->
-                    Hi = integer_to_hex_char((Char band 16#f0) bsr 4),
-                    Lo = integer_to_hex_char((Char band 16#0f)),
-                    urlencode(Str, N + 1, [Lo, Hi, $% | Acc]);
+urlencode(<<Char, Tail/binary>>, Acc) ->
+    urlencode(Tail,
+              case is_urlencoded(Char) of
+                  true ->
+                      Hi = integer_to_hex_char((Char band 16#f0) bsr 4),
+                      Lo = integer_to_hex_char((Char band 16#0f)),
+                      <<Acc/binary, $%, Hi, Lo>>;
+                  false ->
+                      <<Acc/binary, Char>>
+              end
+             );
+urlencode(<<>>, Acc) ->
+    Acc.
 
-                false ->
-                    urlencode(Str, N + 1, [Char | Acc])
-            end;
-        _ ->
-            list_to_binary(lists:reverse(Acc))
-    end.
+
 
 %% @doc Determine whether a character has to be URL-encoded.
 is_urlencoded(Char) ->
@@ -1055,40 +968,18 @@ integer_to_hex_char(N, upper) ->
 %% @doc Decode a bstr using the URL-encoding scheme.
 -spec urldecode(binary()) -> binary().
 urldecode(Str) ->
-    urldecode(Str, 0).
-%% This part of the function iterates over the bstr without copying any data
-%% and once it finds a character that is URL-encoded it switches to
-%% the version of the function that accumulates the converted bstr.
-urldecode(Str, N) ->
-    case Str of
-        <<Head:N/binary, $%, Hi, Lo, _Tail/binary>> ->
-            Char = ((hex_char_to_integer(Hi) bsl 4) bor hex_char_to_integer(Lo)),
-            urldecode(Str, N + 3, <<Head/binary, Char>>);
-        <<_Head:N/binary, Char, _Tail/binary>> ->
-            if
-                Char =:= $% ->
-                    erlang:error(badarg);
-                true ->
-                    urldecode(Str, N + 1)
-            end;
-        _ ->
-            Str
-    end.
-urldecode(Str, N, Acc) ->
-    case Str of
-        <<_Head:N/binary, $%, Hi, Lo, _Tail/binary>> ->
-            Char = ((hex_char_to_integer(Hi) bsl 4) bor hex_char_to_integer(Lo)),
-            urldecode(Str, N + 3, <<Acc/binary, Char>>);
-        <<_Head:N/binary, Char, _Tail/binary>> ->
-            if
-                Char =:= $% ->
-                    erlang:error(badarg);
-                true ->
-                    urldecode(Str, N + 1, <<Acc/binary, Char>>)
-            end;
-        _ ->
-            Acc
-    end.
+    urldecode(Str, <<>>).
+
+urldecode(<<$%, Hi, Lo, Tail/binary>>, Acc) ->
+    Char = ((hex_char_to_integer(Hi) bsl 4) bor hex_char_to_integer(Lo)),
+    urldecode(Tail, <<Acc/binary, Char>>);
+urldecode(<<$%, _Tail/binary>>, _Acc) ->
+    erlang:error(badarg);
+urldecode(<<Char, Tail/binary>>, Acc) ->
+    urldecode(Tail, <<Acc/binary, Char>>);
+urldecode(<<>>, Acc) ->
+    Acc.
+
 
 %% @doc Convert an hexadecimal character to an integer. If the character is not an
 %%      hexadecimal character we return a 'badarg' exception.
@@ -1113,39 +1004,22 @@ hex_char_to_integer(Char) ->
 %%               00h-1Fh. Bytes that are not part of a valid UTF-8 character
 %%               are not converted at all.
 -spec xmlencode(binary()) -> binary().
-xmlencode(Str) when is_binary(Str) ->
-    xmlencode(Str, 0).
-%% This part of the function iterates over the binary() without copying any data
-%% and once it finds a character that has to be XML-encoded it switches to
-%% the version of the function that accumulates the converted bstr.
-xmlencode(Str, Offset) ->
-    case Str of
-        <<Head:Offset/binary, Char, _Tail/binary>> ->
-            case is_xmlencoded(Char) of
-                true ->
-                    Encoded = xmlencode_char(Char),
-                    xmlencode(Str, Offset + 1, [$;, Encoded, $&, Head]);
+xmlencode(Str) ->
+    xmlencode(Str, <<>>).
 
-                false ->
-                    xmlencode(Str, Offset + 1)
-            end;
-        _ ->
-            Str
-    end.
-xmlencode(Str, Offset, Acc) ->
-    case Str of
-        <<_Head:Offset/binary, Char, _Tail/binary>> ->
-            case is_xmlencoded(Char) of
-                true ->
-                    Encoded = xmlencode_char(Char),
-                    xmlencode(Str, Offset + 1, [$;, Encoded, $& | Acc]);
+xmlencode(<<Char, Tail/binary>>, Acc) ->
+    xmlencode(Tail,
+              case is_xmlencoded(Char) of
+                  true ->
+                      Encoded = xmlencode_char(Char),
+                      <<Acc/binary, $&, Encoded/binary, $;>>;
+                  false ->
+                      <<Acc/binary, Char>>
+              end
+             );
+xmlencode(<<>>, Acc) ->
+    Acc.
 
-                false ->
-                    xmlencode(Str, Offset + 1, [Char | Acc])
-            end;
-        _ ->
-            list_to_binary(lists:reverse(Acc))
-    end.
 
 %% @doc Determine whether a character has to be XML-encoded. See
 %% <a href="http://en.wikipedia.org/wiki/UTF-8#Description">Wikipedia</a>,
@@ -1179,79 +1053,52 @@ xmlencode_char(Char) ->
 %%      entity reference present in the string.
 -spec xmldecode(binary()) -> binary().
 xmldecode(Str) ->
-    xmldecode(Str, 0).
-%% This part of the function iterates over the bstr without copying any data
-%% and once it finds a character that is XML-encoded it switches to
-%% the version of the function that accumulates the converted bstr.
-xmldecode(Str, Offset) ->
-    case xmldecode_char(Str, Offset) of
-        %% We found a character that does not need to be decoded
-        {_Char, 1} ->
-            xmldecode(Str, Offset + 1);
-        %% We found a character that needs to be encoded; we create the accumulator
-        %% and call the function that copies each character to create a new string.
-        {Char, Length} ->
-            {Head, _Tail} = split_binary(Str, Offset),
-            xmldecode(Str, Offset + Length, [Char, Head]);
-        eof ->
-            Str
-    end.
-xmldecode(Str, Offset, Acc) ->
-    case xmldecode_char(Str, Offset) of
-        {Char, Length} ->
-            xmldecode(Str, Offset + Length, [Char | Acc]);
-        eof ->
-            list_to_binary(lists:reverse(Acc))
-    end.
+    xmldecode(Str, <<>>).
 
-%% @doc Given a string and an offset, this function checks whether there is a
-%%      character in that position that has to be decoded using the XML
-%%      encoding scheme for character entity references and returns a tuple
-%%      with the decoded character and the length of the encoded substring in
-%%      the original string.
--spec xmldecode_char(binary(), integer()) -> {char(), 1 | 4 | 5 | 6} | eof.
-xmldecode_char(Str, Offset) ->
-    case Str of
-        <<_Head:Offset/binary, "&amp;", _Tail/binary>> ->
-            {$&, 5};
-        <<_Head:Offset/binary, "&lt;", _Tail/binary>> ->
-            {$<, 4};
-        <<_Head:Offset/binary, "&gt;", _Tail/binary>> ->
-            {$>, 4};
-        <<_Head:Offset/binary, "&apos;", _Tail/binary>> ->
-            {$', 6};
-        <<_Head:Offset/binary, "&quot;", _Tail/binary>> ->
-            {$", 6};
-        <<_Head:Offset/binary, "&#x", Hi, Lo, $;,  _Tail/binary>> ->
-            {((hex_char_to_integer(Hi) bsl 4) bor hex_char_to_integer(Lo)), 6};
-        <<_Head:Offset/binary, Char, _Tail/binary>> ->
-            {Char, 1};
-        _ ->
-           eof
-    end.
+xmldecode(<<"&amp;", Tail/binary>>, Acc) ->
+    xmldecode(Tail, <<Acc/binary, $&>>);
+xmldecode(<<"&lt;", Tail/binary>>, Acc) ->
+    xmldecode(Tail, <<Acc/binary, $<>>);
+xmldecode(<<"&gt;", Tail/binary>>, Acc) ->
+    xmldecode(Tail, <<Acc/binary, $>>>);
+xmldecode(<<"&apos;", Tail/binary>>, Acc) ->
+    xmldecode(Tail, <<Acc/binary, $'>>);
+xmldecode(<<"&quot;", Tail/binary>>, Acc) ->
+    xmldecode(Tail, <<Acc/binary, $">>);
+xmldecode(<<"&#x", Hi, Lo, $;, Tail/binary>>, Acc) ->
+    Char = (hex_char_to_integer(Hi) bsl 4) bor hex_char_to_integer(Lo),
+    xmldecode(Tail, <<Acc/binary, Char>>);
+xmldecode(<<Char, Tail/binary>>, Acc) ->
+    xmldecode(Tail, <<Acc/binary, Char>>);
+xmldecode(<<>>, Acc) ->
+    Acc.
 
 
 %% @doc Encode a bstr converting each character to its hexadecimal
 %%      representation.
 -spec hexencode(binary()) -> binary().
-hexencode(Str) when is_binary(Str) ->
-    hexencode(Str, []).
+hexencode(Str) ->
+    hexencode(Str, <<>>).
+
 hexencode(<<Hi:4, Lo:4, Tail/binary>>, Acc) ->
-    hexencode(Tail, [integer_to_hex_char(Lo, lower), integer_to_hex_char(Hi, lower) | Acc]);
+    HiChar = integer_to_hex_char(Hi, lower),
+    LoChar = integer_to_hex_char(Lo, lower),
+    hexencode(Tail, <<Acc/binary, HiChar, LoChar>>);
 hexencode(<<>>, Acc) ->
-    list_to_binary(lists:reverse(Acc)).
+    Acc.
 
 
 %% @doc Decode a bstr with an hexadecimal representation of a string.
 -spec hexdecode(binary()) -> binary().
-hexdecode(Str) when is_binary(Str) ->
-    hexdecode(Str, []).
+hexdecode(Str) ->
+    hexdecode(Str, <<>>).
+
 hexdecode(<<Hi, Lo, Tail/binary>>, Acc) ->
     Char = ((hex_char_to_integer(Hi) bsl 4) bor hex_char_to_integer(Lo)),
-    hexdecode(Tail, [Char | Acc]);
+    hexdecode(Tail, <<Acc/binary, Char>>);
 % If the number of characters wasn't even we raise an exception.
 hexdecode(<<_Char>>, _Acc) ->
     erlang:error(badarg);
 hexdecode(<<>>, Acc) ->
-    list_to_binary(lists:reverse(Acc)).
+    Acc.
 
