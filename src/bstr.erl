@@ -554,16 +554,15 @@ split_str_sep(<<>>, TokenAcc, _Sep, Tokens) ->
 
 
 %% @doc Join a a list of strings into one string.
-% join(List) when is_list(List) ->
-%     join_list(List, <<>>).
-% join_list([Head|Tail], Acc) ->
-%     Value = bstr(Head),
-%     join_list(Tail, <<Acc/binary, Value/binary>>);
-% join_list([], Acc) ->
-%     Acc.
-%% This version is about 30% faster than the one above. Re-test once Erlang R12B
-%% is released. This test was performed before adding support for deep lists.
 -spec join([binary()]) -> binary().
+%% join(List) when is_list(List) ->
+%%     join_list(List, <<>>).
+%% join_list([Head|Tail], Acc) ->
+%%     Value = bstr(Head),
+%%     join_list(Tail, <<Acc/binary, Value/binary>>);
+%% join_list([], Acc) ->
+%%     Acc.
+%% This version is about 5% faster than the one above with Erlang R14B01.
 join(List) when is_list(List) ->
     list_to_binary(join_list(List, [])).
 join_list([Head | Tail], Acc) when is_atom(Head) ->
@@ -574,7 +573,6 @@ join_list([Head | Tail], Acc) ->
     join_list(Tail, [Head | Acc]);
 join_list([], Acc) ->
     lists:reverse(Acc).
-
 
 %% @doc Join a a list of strings into one string, adding a separator between
 %%      each string.
