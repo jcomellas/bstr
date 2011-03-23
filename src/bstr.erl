@@ -1,7 +1,7 @@
 %%%-------------------------------------------------------------------
 %%% @author Juan Jose Comellas <juanjo@comellas.org>
 %%% @author Mahesh Paolini-Subramanya <mahesh@aptela.com>
-%%% @copyright (C) 2008-2011  Juan Jose Comellas, Mahesh Paolini-Subramanya.
+%%% @copyright 2008-2011  Juan Jose Comellas, Mahesh Paolini-Subramanya.
 %%% @doc String implemented over an Erlang binary.
 %%% @end
 %%% This source file is subject to the New BSD License. You should have received
@@ -246,12 +246,10 @@ is_numeric_decimals(_Str, _Stage) ->
     false.
 
 
-%%--------------------------------------------------------------------
-%% @spec is_x(Str::binary(), Fun::fun((char()) -> boolean())) -> boolean()
 %% @doc  Helper function used to check whether all the characters in a string
 %%       meet a specific criteria that is passed as a function to it.
 %% @end
-%%--------------------------------------------------------------------
+-spec is_x(Str::binary(), Fun::fun((char()) -> boolean())) -> boolean().
 %% is_x(<<>>, _Fun, _Offset) ->
 %%     false;
 %% is_x(Str, Fun, Offset) ->
@@ -270,7 +268,6 @@ is_numeric_decimals(_Str, _Stage) ->
 %%     end.
 %% This version is about 5% faster than the one above. Re-test once Erlang R12B
 %% is released.
--spec is_x(Str::binary(), Fun::fun((char()) -> boolean())) -> boolean().
 is_x(<<Char, Tail/binary>>, Fun) ->
     case Fun(Char) of
         true ->
@@ -599,10 +596,6 @@ join_list_sep([], _Sep, Acc) ->
     lists:reverse(Acc).
 
 
-%%--------------------------------------------------------------------
-%% @spec join(Members :: list(binary()),
-%%            Sep     :: char() | binary(),
-%%            Esc     :: char() ) -> binary()
 %% @doc  Join a a list of strings into one string, adding a separator between
 %%       each string and escaping both the separator and the escape char itself
 %%       with the escape char.
@@ -610,7 +603,6 @@ join_list_sep([], _Sep, Acc) ->
 %% E.g.:
 %%       `bstr:join([<<"1">>, <<",">>, <<"\1">>, <<"2,3">>], $,, $\) ->`
 %%       `       <<"1,\,,\\1,2\,3">>.`
-%%--------------------------------------------------------------------
 -spec join([binary()], Sep :: char() | binary(), Esc :: char()) -> binary().
 join(Members, Sep, Esc) ->
     EscStr =

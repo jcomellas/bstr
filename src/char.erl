@@ -1,7 +1,7 @@
 %%%-------------------------------------------------------------------
 %%% @author Juan Jose Comellas <juanjo@comellas.org>
 %%% @author Mahesh Paolini-Subramanya <mahesh@aptela.com>
-%%% @copyright (C) 2008-2011  Juan Jose Comellas, Mahesh Paolini-Subramanya.
+%%% @copyright 2008-2011  Juan Jose Comellas, Mahesh Paolini-Subramanya.
 %%% @doc Character functions.
 %%% @end
 %%%-------------------------------------------------------------------
@@ -15,20 +15,14 @@
          must_urlencode/1, must_xmlencode/1]).
 
 
-%%--------------------------------------------------------------------
-%% @spec is_alpha(char()) -> boolean()
-%% @doc  Determines if a character is alphabetic.
-%%--------------------------------------------------------------------
+%% @doc Determines if a character is alphabetic.
 -spec is_alpha(char()) -> boolean().
 is_alpha(Char) ->
     ((Char >= $A) andalso (Char =< $Z)) orelse
     ((Char >= $a) andalso (Char =< $z)).
 
 
-%%--------------------------------------------------------------------
-%% @spec is_alnum(char()) -> integer()
-%% @doc  Determines if a character is alphanumeric.
-%%--------------------------------------------------------------------
+%% @doc Determines if a character is alphanumeric.
 -spec is_alnum(char()) -> boolean().
 is_alnum(Char) ->
     ((Char >= $A) andalso (Char =< $Z)) orelse
@@ -36,37 +30,25 @@ is_alnum(Char) ->
     ((Char >= $0) andalso (Char =< $9)).
 
 
-%%--------------------------------------------------------------------
-%% @spec is_lower(char()) -> boolean()
-%% @doc  Determines if a character is lower-case.
-%%--------------------------------------------------------------------
+%% @doc Determines if a character is lower-case.
 -spec is_lower(char()) -> boolean().
 is_lower(Char) ->
     ((Char >= $a) andalso (Char =< $z)).
 
 
-%%--------------------------------------------------------------------
-%% @spec is_upper(char()) -> boolean()
-%% @doc  Determines if a character is upper-case.
-%%--------------------------------------------------------------------
+%% @doc Determines if a character is upper-case.
 -spec is_upper(char()) -> boolean().
 is_upper(Char) ->
     ((Char >= $A) andalso (Char =< $Z)).
 
 
-%%--------------------------------------------------------------------
-%% @spec is_digit(char()) -> boolean()
-%% @doc  Determines if a character is a decimal digit.
-%%--------------------------------------------------------------------
+%% @doc Determines if a character is a decimal digit.
 -spec is_digit(char()) -> boolean().
 is_digit(Char) ->
     ((Char >= $0) andalso (Char =< $9)).
 
 
-%%--------------------------------------------------------------------
-%% @spec is_xdigit(char()) -> boolean()
-%% @doc  Determines if a character is an hexadecimal digit.
-%%--------------------------------------------------------------------
+%% @doc Determines if a character is an hexadecimal digit.
 -spec is_xdigit(char()) -> boolean().
 is_xdigit(Char) ->
     ((Char >= $0) andalso (Char =< $9)) orelse
@@ -74,30 +56,21 @@ is_xdigit(Char) ->
     ((Char >= $a) andalso (Char =< $f)).
 
 
-%%--------------------------------------------------------------------
-%% @spec is_blank(char()) -> boolean()
-%% @doc  Determines if a character is blank (\n, \r, \t, \f, \v).
-%%--------------------------------------------------------------------
+%% @doc Determines if a character is blank (\n, \r, \t, \f, \v).
 -spec is_blank(char()) -> boolean().
 is_blank(Char) ->
     ((Char =:= $\s) orelse (Char =:= $\t)).
 
 
-%%--------------------------------------------------------------------
-%% @spec is_space(char()) -> boolean()
-%% @doc  Determines if a character is a space or a tab.
-%%--------------------------------------------------------------------
+%% @doc Determines if a character is a space or a tab.
 -spec is_space(char()) -> boolean().
 is_space(Char) ->
     ((Char =:= $\s) orelse (Char =:= $\n) orelse (Char =:= $\r) orelse
      (Char =:= $\t) orelse (Char =:= $\f) orelse (Char =:= $\v)).
 
 
-%%--------------------------------------------------------------------
-%% @spec is_atom(char()) -> boolean()
-%% @doc  Determines if a character is allowed in an unquoted atom
+%% @doc Determines if a character is allowed in an unquoted atom
 %%       (i.e. lower case, numeric, '_' or '@').
-%%--------------------------------------------------------------------
 -spec is_atom(char()) -> boolean().
 is_atom(Char) ->
     ((Char >= $a) andalso (Char =< $z)) orelse
@@ -106,10 +79,7 @@ is_atom(Char) ->
     (Char =:= $@).
 
 
-%%--------------------------------------------------------------------
-%% @spec lower(char()) -> char()
-%% @doc  Convert a character to lower-case.
-%%--------------------------------------------------------------------
+%% @doc Convert a character to lower-case.
 -spec lower(char()) -> char().
 lower(Char) when is_integer(Char) ->
     case is_upper(Char) of
@@ -120,10 +90,7 @@ lower(Char) when is_integer(Char) ->
     end.
 
 
-%%--------------------------------------------------------------------
-%% @spec upper(char()) -> char()
-%% @doc  Convert a character to upper-case.
-%%--------------------------------------------------------------------
+%% @doc Convert a character to upper-case.
 -spec upper(char()) -> char().
 upper(Char) when is_integer(Char) ->
     case is_lower(Char) of
@@ -134,10 +101,7 @@ upper(Char) when is_integer(Char) ->
     end.
 
 
-%%--------------------------------------------------------------------
-%% @spec integer_to_hex(integer()) -> integer()
-%% @doc  Convert an integer between 0 and 15 to an hexadecimal character.
-%%--------------------------------------------------------------------
+%% @doc Convert an integer between 0 and 15 to an hexadecimal character.
 -spec integer_to_hex(integer()) -> char().
 integer_to_hex(N) when N >= 0 ->
     if
@@ -149,11 +113,8 @@ integer_to_hex(N) when N >= 0 ->
             erlang:error(badarg)
     end.
 
-%%--------------------------------------------------------------------
-%% @spec integer_to_hex(integer(), lower | upper) -> integer()
-%% @doc  Convert an integer between 0 and 15 to an hexadecimal character
-%%       choosing the case (lower, upper) for the hexadecimal digits.
-%%--------------------------------------------------------------------
+%% @doc Convert an integer between 0 and 15 to an hexadecimal character
+%%      choosing the case (lower, upper) for the hexadecimal digits.
 -spec integer_to_hex(integer(), 'lower' | 'upper') -> char().
 integer_to_hex(N, lower) when N >= 0 ->
     if
@@ -168,11 +129,8 @@ integer_to_hex(N, upper) ->
     integer_to_hex(N).
 
 
-%%--------------------------------------------------------------------
-%% @spec hex_to_integer(integer()) -> integer()
-%% @doc  Convert an hexadecimal character to an integer. If the character is
-%%       not an hexadecimal character we return a 'badarg' exception.
-%%--------------------------------------------------------------------
+%% @doc Convert an hexadecimal character to an integer. If the character is
+%%      not an hexadecimal character we return a 'badarg' exception.
 -spec hex_to_integer(char()) -> integer().
 hex_to_integer(Char) ->
     if
@@ -187,10 +145,7 @@ hex_to_integer(Char) ->
     end.
 
 
-%%--------------------------------------------------------------------
 %% @spec must_urlencode(integer()) -> boolean()
-%% @doc  Determine whether a character has to be URL-encoded.
-%%--------------------------------------------------------------------
 -spec must_urlencode(char()) -> boolean().
 must_urlencode(Char) ->
     not (((Char >= $0) andalso (Char =< $9)) orelse
@@ -200,12 +155,9 @@ must_urlencode(Char) ->
          (Char =:= $.) orelse (Char =:= $~)).
 
 
-%%--------------------------------------------------------------------
-%% @spec must_xmlencode(integer()) -> boolean()
-%% @doc  Determine whether a character has to be XML-encoded.
-%% @see  http://en.wikipedia.org/wiki/UTF-8#Description
-%% @see  http://www.asciitable.com/
-%%--------------------------------------------------------------------
+%% @doc Determine whether a character has to be XML-encoded.
+%%      See [http://en.wikipedia.org/wiki/UTF-8#Description] and
+%%      [http://www.asciitable.com/].
 -spec must_xmlencode(char()) -> boolean().
 must_xmlencode(Char) ->
     (Char < 32) orelse (Char =:= 192) orelse (Char =:= 193) orelse (Char > 244)
