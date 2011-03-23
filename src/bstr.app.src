@@ -1,6 +1,6 @@
 {application, bstr,
  [
-  {description, ""},
+  {description, "Library to use binaries as strings"},
   {vsn, "0.1.0"},
   {registered, []},
   {applications, [kernel, stdlib]},
