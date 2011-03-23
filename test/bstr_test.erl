@@ -1,24 +1,25 @@
-%%% @author Juan Jose Comellas <juanjo@comellas.org>
-%%% @copyright 2008 Juan Jose Comellas
+%%% @author Juan Jose Comellas <jcomellas@novamens.com>
+%%% @copyright 2008 Aptela, Inc
 
 %%% @doc Tests for the bstr module.
 
 -module(bstr_test).
--author('Juan Jose Comellas <juanjo@comellas.org>').
+-author('Juan Jose Comellas <jcomellas@novamens.com>').
 
 -include_lib("eunit/include/eunit.hrl").
 
--import(bstr, [empty/1, len/1, equal/2, concat/2, nth/2, index/2, rindex/2,
+-import(bstr, [len/1, equal/2, concat/2, nth/2, index/2, rindex/2,
                member/2, prefix/2, suffix/2,
                is_alpha/1, is_alnum/1, is_lower/1, is_upper/1, is_digit/1,
-               is_xdigit/1, is_blank/1, is_space/1, is_atom_as_binary/1,
+               is_xdigit/1, is_blank/1, is_space/1, is_atom_as_binary/1, is_numeric/1,
                insert/3, duplicate/2, substr/2, substr/3, left/2, right/2,
                pad/2, pad/3, lpad/2, lpad/3, rpad/2, rpad/3,
                strip/1, strip/2, lstrip/1, lstrip/2, rstrip/1, rstrip/2, chomp/1,
                split/2, join/1, join/2, lower/1, upper/1, bstr/1,
                from_atom/1, to_atom/1, to_existing_atom/1, from_list/1, to_list/1,
-               from_integer/1, from_integer/2, from_integer/3,
-               to_integer/1, to_integer/2, to_boolean/1,
+               to_boolean/1, from_integer/1, from_integer/2, from_integer/3,
+               to_integer/1, to_integer/2, from_float/1, to_float/1, from_number/1, to_number/1,
+               integer_to_hex_char/1, integer_to_hex_char/2, hex_char_to_integer/1, 
                get_line/1, urlencode/1, urldecode/1, xmlencode/1, xmldecode/1,
                hexencode/1, hexdecode/1]).
 
@@ -26,14 +27,6 @@
 %%%-------------------------------------------------------------------
 %%% UNIT TESTS
 %%%-------------------------------------------------------------------
-
-%%% Test for the empty/2 function
-empty_2_test() ->
-    ?assert(empty(<<>>)),
-    ?assert(empty(undefined)),
-    ?assertNot(empty(<<"ABC">>)),
-    ?assertNot(empty(<<"123">>)),
-    ?assertNot(empty(<<"ABC123">>)).
 
 %%% Test for the len/1 function
 len_1_test() ->
@@ -234,6 +227,24 @@ is_atom_as_binary_1_test() ->
     ?assert(is_atom_as_binary(<<"user@host">>)),
     ?assert(is_atom_as_binary(<<"this_is_an_atom_2">>)).
 
+%%% Test for the is_numeric/1 function
+is_numeric_1_test() ->
+    ?assertNot(is_numeric(<<>>)),
+    ?assert(is_numeric(<<"0123456789">>)),
+    ?assert(is_numeric(<<"+123456.789">>)),
+    ?assert(is_numeric(<<"-123456.789">>)),
+    ?assertNot(is_numeric(<<"ABC123">>)),
+    ?assertNot(is_numeric(<<"abc123">>)),
+    ?assertNot(is_numeric(<<"123 456">>)),
+    ?assertNot(is_numeric(<<".23456">>)),
+    ?assertNot(is_numeric(<<"123-456">>)),
+    ?assertNot(is_numeric(<<"123+456">>)),
+    ?assertNot(is_numeric(<<"123456.">>)),
+    ?assertNot(is_numeric($A)),
+    ?assertNot(is_numeric($z)),
+    ?assert(is_numeric($1)),
+    ?assertNot(is_numeric($-)).
+
 %%% Test for the insert/3 function
 insert_3_test() ->
     ?assertMatch(<<"123">>, insert(<<>>, 1, <<"123">>)),
@@ -346,16 +357,24 @@ strip_2_test() ->
     ?assertMatch(<<>>, strip(<<>>)),
     ?assertMatch(<<>>, strip(<<" ">>)),
     ?assertMatch(<<"ABC">>, strip(<<"ABC  ">>)),
+    ?assertMatch(<<"ABC">>, strip(<<"ABC  \t\n">>)),
     ?assertMatch(<<"ABC">>, strip(<<"  ABC">>)),
-    ?assertMatch(<<"ABC">>, strip(<<"  ABC  ">>)).
+    ?assertMatch(<<"ABC">>, strip(<<"\r\v\f  ABC">>)),
+    ?assertMatch(<<"ABC">>, strip(<<"  ABC  ">>)),
+    ?assertMatch(<<"ABC">>, strip(<<"\r  ABC  \n">>)).
 
 %%% Test for the strip/3 function
 strip_3_test() ->
     ?assertMatch(<<>>, strip(<<>>, $*)),
+    ?assertMatch(<<>>, strip(<<>>, <<"\r\n\s">>)),
     ?assertMatch(<<>>, strip(<<"*">>, $*)),
+    ?assertMatch(<<>>, strip(<<"*">>, <<"*">>)),
     ?assertMatch(<<"ABC">>, strip(<<"ABC**">>, $*)),
+    ?assertMatch(<<"ABC">>, strip(<<"ABC^^*&*">>, <<"*&^">>)),
     ?assertMatch(<<"ABC">>, strip(<<"**ABC">>, $*)),
-    ?assertMatch(<<"ABC">>, strip(<<"**ABC**">>, $*)).
+    ?assertMatch(<<"ABC">>, strip(<<"@@@@!!%%%%ABC">>, <<"%@!">>)),
+    ?assertMatch(<<"ABC">>, strip(<<"**ABC**">>, $*)),
+    ?assertMatch(<<"ABC">>, strip(<<"*#*%ABC/**">>, <<"#%/*">>)).
 
 
 %%% Test for the lstrip/2 function
@@ -363,33 +382,50 @@ lstrip_2_test() ->
     ?assertMatch(<<>>, lstrip(<<>>)),
     ?assertMatch(<<>>, lstrip(<<" ">>)),
     ?assertMatch(<<"ABC  ">>, lstrip(<<"ABC  ">>)),
+    ?assertMatch(<<"ABC  \t\n">>, lstrip(<<"ABC  \t\n">>)),
     ?assertMatch(<<"ABC">>, lstrip(<<"  ABC">>)),
-    ?assertMatch(<<"ABC  ">>, lstrip(<<"  ABC  ">>)).
+    ?assertMatch(<<"ABC">>, lstrip(<<"\r\v\f  ABC">>)),
+    ?assertMatch(<<"ABC  ">>, lstrip(<<"  ABC  ">>)),
+    ?assertMatch(<<"ABC  \n">>, lstrip(<<"\r  ABC  \n">>)).
 
 %%% Test for the lstrip/3 function
 lstrip_3_test() ->
     ?assertMatch(<<>>, lstrip(<<>>, $*)),
+    ?assertMatch(<<>>, lstrip(<<>>, <<"\r\n\s">>)),
     ?assertMatch(<<>>, lstrip(<<"*">>, $*)),
+    ?assertMatch(<<>>, lstrip(<<"*">>, <<"*">>)),
     ?assertMatch(<<"ABC**">>, lstrip(<<"ABC**">>, $*)),
+    ?assertMatch(<<"ABC^^*&*">>, lstrip(<<"ABC^^*&*">>, <<"*&^">>)),
     ?assertMatch(<<"ABC">>, lstrip(<<"**ABC">>, $*)),
-    ?assertMatch(<<"ABC**">>, lstrip(<<"**ABC**">>, $*)).
+    ?assertMatch(<<"ABC">>, lstrip(<<"@@@@!!%%%%ABC">>, <<"%@!">>)),
+    ?assertMatch(<<"ABC**">>, lstrip(<<"**ABC**">>, $*)),
+    ?assertMatch(<<"ABC/**">>, lstrip(<<"*#*%ABC/**">>, <<"#%/*">>)).
 
 
 %%% Test for the rstrip/2 function
 rstrip_2_test() ->
     ?assertMatch(<<>>, rstrip(<<>>)),
+    ?assertMatch(<<>>, rstrip(<<>>, <<"\r\n\s">>)),
     ?assertMatch(<<>>, rstrip(<<" ">>)),
     ?assertMatch(<<"ABC">>, rstrip(<<"ABC  ">>)),
+    ?assertMatch(<<"ABC">>, rstrip(<<"ABC  \t\n">>)),
     ?assertMatch(<<"  ABC">>, rstrip(<<"  ABC">>)),
-    ?assertMatch(<<"  ABC">>, rstrip(<<"  ABC  ">>)).
+    ?assertMatch(<<"\r\v\f  ABC">>, rstrip(<<"\r\v\f  ABC">>)),
+    ?assertMatch(<<"  ABC">>, rstrip(<<"  ABC  ">>)),
+    ?assertMatch(<<"\r  ABC">>, rstrip(<<"\r  ABC  \n">>)).
 
 %%% Test for the rstrip/3 function
 rstrip_3_test() ->
     ?assertMatch(<<>>, rstrip(<<>>, $*)),
+    ?assertMatch(<<>>, rstrip(<<>>, <<"\r\n\s">>)),
     ?assertMatch(<<>>, rstrip(<<"*">>, $*)),
+    ?assertMatch(<<>>, rstrip(<<"*">>, <<"*">>)),
     ?assertMatch(<<"ABC">>, rstrip(<<"ABC**">>, $*)),
+    ?assertMatch(<<"ABC">>, rstrip(<<"ABC^^*&*">>, <<"*&^">>)),
     ?assertMatch(<<"**ABC">>, rstrip(<<"**ABC">>, $*)),
-    ?assertMatch(<<"**ABC">>, rstrip(<<"**ABC**">>, $*)).
+    ?assertMatch(<<"@@@@!!%%%%ABC">>, rstrip(<<"@@@@!!%%%%ABC">>, <<"%@!">>)),
+    ?assertMatch(<<"**ABC">>, rstrip(<<"**ABC**">>, $*)),
+    ?assertMatch(<<"*#*%ABC">>, rstrip(<<"*#*%ABC/**">>, <<"#%/*">>)).
 
 %%% Test for the chomp/1 function
 chomp_1_test() ->
@@ -469,11 +505,7 @@ lower_1_test() ->
     ?assertMatch(<<"abcde">>, lower(<<"abcde">>)),
     ?assertMatch($c, lower($c)),
     %% Combined characters
-    ?assertMatch(<<"abcde">>, lower(<<"AbCdE">>)),
-    %% Single upper-case character
-    ?assertMatch($a, lower($A)),
-    %% Single lower-case character
-    ?assertMatch($a, lower($a)).
+    ?assertMatch(<<"abcde">>, lower(<<"AbCdE">>)).
 
 %%% Test for the upper/1 function
 upper_1_test() ->
@@ -490,11 +522,7 @@ upper_1_test() ->
     ?assertMatch(<<"ABCDE">>, upper(<<"abcde">>)),
     ?assertMatch($C, upper($c)),
     %% Combined characters
-    ?assertMatch(<<"ABCDE">>, upper(<<"AbCdE">>)),
-    %% Single upper-case character
-    ?assertMatch($A, upper($A)),
-    %% Single lower-case character
-    ?assertMatch($A, upper($a)).
+    ?assertMatch(<<"ABCDE">>, upper(<<"AbCdE">>)).
 
 %%% Test for the from_atom/1 function
 from_atom_1_test() ->
@@ -604,6 +632,56 @@ from_integer_3_test() ->
     ?assertMatch(<<"-d4be">>, from_integer(-54462, 16, lower)),
     %% Floating point number
     ?assertError(badarg, from_integer(12345.67, 16)).
+
+%%% Test for the from_float/1 function
+from_float_1_test() ->
+    %% Positive integer
+    ?assertMatch(<<"12345">>, from_float(12345)),
+    %% Negative integer
+    ?assertMatch(<<"-12345">>, from_float(-12345)),
+    %% Floating point number
+    ?assertMatch(<<"12345.67">>, from_float(12345.67)),
+    %% Non-numeric string.
+    ?assertError(badarg, from_float(<<"abcdef">>)).
+
+%%% Test for the to_float/1 function
+to_float_1_test() ->
+    %% Positive floating point number
+    ?assertMatch(12345.0, to_float(<<"12345.0">>)),
+    %% Negative floating point number
+    ?assertMatch(-12345.0, to_float(<<"-12345.0">>)),
+    %% Empty string
+    ?assertError(badarg, to_float(<<>>)),
+    %% Integer
+    ?assertError(badarg, to_float(<<"12345">>)),
+    %% Invalid characters
+    ?assertError(badarg, to_float(<<"ABC">>)).
+
+%%% Test for the from_number/1 function
+from_number_1_test() ->
+    %% Positive integer
+    ?assertMatch(<<"12345">>, from_number(12345)),
+    %% Negative integer
+    ?assertMatch(<<"-12345">>, from_number(-12345)),
+    %% Floating point number
+    ?assertMatch(<<"12345.67">>, from_number(12345.67)),
+    %% Non-numeric string.
+    ?assertError(badarg, from_number(<<"abcdef">>)).
+
+%%% Test for the to_number/1 function
+to_number_1_test() ->
+    %% Positive integer
+    ?assertMatch(12345, to_number(<<"12345">>)),
+    %% Negative integer
+    ?assertMatch(-12345, to_number(<<"-12345">>)),
+    %% Positive floating point number
+    ?assertMatch(12345.0, to_number(<<"12345.0">>)),
+    %% Negative floating point number
+    ?assertMatch(-12345.0, to_number(<<"-12345.0">>)),
+    %% Empty string
+    ?assertError(badarg, to_number(<<>>)),
+    %% Invalid characters
+    ?assertError(badarg, to_number(<<"ABC">>)).
 
 %%% Test for the get_line/1 function
 get_line_1_test() ->
