@@ -1,11 +1,13 @@
 %%%-------------------------------------------------------------------
 %%% @author Juan Jose Comellas <juanjo@comellas.org>
-%%% @copyright (C) 2010, Juan Jose Comellas
+%%% @author Mahesh Paolini-Subramanya <mahesh@aptela.com>
+%%% @copyright (C) 2008-2011  Juan Jose Comellas, Mahesh Paolini-Subramanya.
 %%% @doc Character functions.
 %%% @end
 %%%-------------------------------------------------------------------
 -module(char).
--author('Juan Jose Comellas <jcomellas@novamens.com>').
+-author('Juan Jose Comellas <juanjo@comellas.org>').
+-author('Mahesh Paolini-Subramanya <mahesh@aptela.com>').
 
 -export([is_alpha/1, is_alnum/1, is_lower/1, is_upper/1, is_digit/1, is_xdigit/1,
          is_blank/1, is_space/1, is_atom/1, lower/1, upper/1,

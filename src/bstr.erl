@@ -1,8 +1,7 @@
 %%%-------------------------------------------------------------------
 %%% @author Juan Jose Comellas <juanjo@comellas.org>
 %%% @author Mahesh Paolini-Subramanya <mahesh@aptela.com>
-%%% @copyright (C) 2008-2011, Juan Jose Comellas.
-%%% @copyright (C) 2008-2011, Mahesh Paolini-Subramanya.
+%%% @copyright (C) 2008-2011  Juan Jose Comellas, Mahesh Paolini-Subramanya.
 %%% @doc String implemented over an Erlang binary.
 %%% @end
 %%% This source file is subject to the New BSD License. You should have received
