@@ -599,10 +599,10 @@ join_list_sep([], _Sep, Acc) ->
 %% @doc  Join a a list of strings into one string, adding a separator between
 %%       each string and escaping both the separator and the escape char itself
 %%       with the escape char.
+%%
+%%       e.g.:
+%%       ``bstr:join([<<"1">>, <<",">>, <<"\1">>, <<"2,3">>], $,, $\) -> <<"1,\,,\\1,2\,3">>.''
 %% @end
-%% E.g.:
-%%       `bstr:join([<<"1">>, <<",">>, <<"\1">>, <<"2,3">>], $,, $\) ->`
-%%       `       <<"1,\,,\\1,2\,3">>.`
 -spec join([binary()], Sep :: char() | binary(), Esc :: char()) -> binary().
 join(Members, Sep, Esc) ->
     EscStr =
