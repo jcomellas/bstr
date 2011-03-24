@@ -37,9 +37,9 @@ len(Str) when is_binary(Str) ->
 
 %% @doc Checks if two strings are equal.
 -spec equal(binary(), binary()) -> boolean().
-equal(Str, Str) when is_binary(Str) ->
+equal(Str, Str) ->
     true;
-equal(Str, _) when is_binary(Str) ->
+equal(_, _) ->
     false.
 
 
@@ -51,7 +51,7 @@ concat(Str1, Str2) when is_binary(Str1), is_binary(Str2) ->
 
 %% @doc Return the character in the nth position of the string.
 -spec nth(binary(), pos_integer()) -> char().
-nth(Str, Pos) when is_binary(Str), Pos > 0, Pos =< size(Str) ->
+nth(Str, Pos) when Pos > 0, Pos =< size(Str) ->
     Offset = Pos - 1,
     <<_Head:Offset/binary, Char, _Tail/binary>> = Str,
     Char.
@@ -291,14 +291,22 @@ insert(Str, Pos, Str1) when is_binary(Str), is_integer(Pos) ->
     end.
 
 
-%% @doc Return 'Number' copies of a string.
--spec duplicate(binary(), integer()) -> binary().
-duplicate(Str, Num) ->
-    duplicate(Str, Num, []).
-duplicate(Str, Num, Acc) when Num > 0 ->
-    duplicate(Str, Num - 1, [Str | Acc]);
-duplicate(_Str, _Num, Acc) ->
-    erlang:list_to_binary(Acc).
+%% @doc Return 'Count' copies of a string.
+-spec duplicate(char() | binary(), Count :: non_neg_integer()) -> binary().
+duplicate(Char, Count) when is_integer(Char) ->
+    duplicate_char(Char, Count, <<>>);
+duplicate(Str, Count) ->
+    duplicate_bin(Str, Count, <<>>).
+
+duplicate_char(Char, Count, Acc) when Count > 0 ->
+    duplicate_char(Char, Count - 1, <<Acc/binary, Char>>);
+duplicate_char(_Char, _Len, Acc) ->
+    Acc.
+
+duplicate_bin(Str, Count, Acc) when Count > 0 ->
+    duplicate_bin(Str, Count - 1, <<Acc/binary, Str/binary>>);
+duplicate_bin(_Str, _Len, Acc) ->
+    Acc.
 
 
 %% @doc Return a substring starting at position 'Pos'.
@@ -359,8 +367,8 @@ pad(Str, Len) when Len >= 0 ->
     pad(Str, Len, $\s).
 
 %% @doc Return a string of 'Len' bytes padded with 'Chars' to the left and to the right.
--spec pad(binary(), integer(), char()) -> binary().
-pad(Str, Len, Char) when Len >= 0 ->
+-spec pad(binary(), non_neg_integer(), char()) -> binary().
+pad(Str, Len, Char) when Len >= 0, is_integer(Char) ->
     PadLen = Len - size(Str),
     if
         PadLen > 0 ->
@@ -390,7 +398,7 @@ lpad(Str, Len) when Len >= 0 ->
 
 %% @doc Return a string of 'Len' bytes left-padded with 'Chars'.
 -spec lpad(binary(), non_neg_integer(), char()) -> binary().
-lpad(Str, Len, Char) when Len >= 0 ->
+lpad(Str, Len, Char) when Len >= 0, is_integer(Char) ->
     PadLen = Len - size(Str),
     if
         PadLen > 0 ->
@@ -408,7 +416,7 @@ rpad(Str, Len) when Len >= 0 ->
 
 %% @doc Return a string of 'Len' bytes right-padded with 'Chars'.
 -spec rpad(binary(), non_neg_integer(), char()) -> binary().
-rpad(Str, Len, Char) ->
+rpad(Str, Len, Char) when Len >= 0, is_integer(Char) ->
     PadLen = Len - size(Str),
     if
         PadLen > 0 ->
@@ -421,11 +429,11 @@ rpad(Str, Len, Char) ->
 
 %% @doc Remove all the spaces present both to the left and to the right of the string.
 -spec strip(binary()) -> binary().
-strip(Str) when is_binary(Str) ->
+strip(Str) ->
     strip(Str, <<"\s\t\n\r\f\v">>).
 
 %% @doc Remove all the 'Chars' present both to the left and to the right of the string.
--spec strip(binary(), char()) -> binary().
+-spec strip(binary(), char() | binary()) -> binary().
 strip(Str, Char) ->
     rstrip(lstrip(Str, Char), Char).
 
@@ -529,7 +537,7 @@ split(Str, Sep)  ->
     lists:reverse(Tokens).
 
 %% @doc Helper function used to tokenize a string when the separator is a character.
--spec split_char_sep(binary(), char(), integer(), [binary()]) -> [binary()].
+-spec split_char_sep(binary(), binary(), char(), [binary()]) -> [binary()].
 split_char_sep(<<Sep, Tail/binary>>, TokenAcc, Sep, Tokens) ->
     split_char_sep(Tail, <<>>, Sep, [TokenAcc | Tokens]);
 split_char_sep(<<Char, Tail/binary>>, TokenAcc, Sep, Tokens) ->
