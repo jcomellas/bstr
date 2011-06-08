@@ -1,1 +1,1 @@
-{"src/*", [debug_info, fail_on_warning, {outdir, "ebin"}, {i, "include"}]}.
+{"src/*", [debug_info, warnings_as_errors, {outdir, "ebin"}, {i, "include"}]}.
