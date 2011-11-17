@@ -508,12 +508,10 @@ rstrip_bin(Str, Chars, Pos) ->
 %% @doc Remove all the newlines (\r and \n) present at the end of the string.
 -spec chomp(binary()) -> binary().
 chomp(Str) ->
-    chomp(Str, size(Str) - 1).
-
-chomp(Str, Pos) ->
+    Pos = size(Str) - 1,
     case Str of
         <<Head:Pos/binary, Char>> when Char =:= $\r; Char =:= $\n ->
-            chomp(Head, Pos - 1);
+            chomp(Head);
         _ ->
             Str
     end.
