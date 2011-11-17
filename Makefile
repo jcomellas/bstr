@@ -15,9 +15,12 @@ compile:
 	@./rebar compile
 
 doc:
-	@./rebar doc
+	@./rebar skip_deps=true doc
 
 clean:
+	@./rebar skip_deps=true clean
+
+depclean:
 	@./rebar clean
 
 distclean:
@@ -33,7 +36,7 @@ dialyze: compile
 	@./rebar dialyze
 
 test:
-	@./rebar eunit
+	@./rebar skip_deps=true eunit
 
 console: compile
 	$(ERL) -sname $(APPLICATION) $(EPATH)
