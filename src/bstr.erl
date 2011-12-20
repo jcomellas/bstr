@@ -705,6 +705,9 @@ bstr(Integer) when is_integer(Integer), Integer > 0, Integer =< 255 ->
     <<Integer>>;
 bstr(Integer) when is_integer(Integer) ->
     from_integer(Integer);
+bstr(Float) when is_float(Float) ->
+    %% Use mochinum to avoid weird formatting by the Erlang float_to_list() BIF.
+    list_to_binary(mochinum:digits(Float)).
 bstr(List) when is_list(List) ->
     list_to_binary(List).
 
