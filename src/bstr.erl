@@ -9,24 +9,82 @@
 %%% retrieved from: http://www.opensource.org/licenses/bsd-license.php
 %%%-------------------------------------------------------------------
 -module(bstr).
+
 -author('Juan Jose Comellas <juanjo@comellas.org>').
 -author('Mahesh Paolini-Subramanya <mahesh@aptela.com>').
 
--export([len/1, equal/2, concat/2, nth/2, index/2, rindex/2,
-         member/2, prefix/2, suffix/2,
-         is_alpha/1, is_alnum/1, is_lower/1, is_upper/1, is_digit/1,
-         is_xdigit/1, is_blank/1, is_space/1, is_atom_as_binary/1,
-         is_atom_char/1, is_numeric/1,
-         insert/3, duplicate/2, substr/2, substr/3, left/2, right/2,
-         pad/2, pad/3, lpad/2, lpad/3, rpad/2, rpad/3,
-         strip/1, strip/2, lstrip/1, lstrip/2, rstrip/1, rstrip/2, chomp/1,
-         split/2, join/1, join/2, join/3, lower/1, upper/1, bstr/1,
-         from_atom/1, to_atom/1, to_existing_atom/1, from_list/1, to_list/1,
-         to_boolean/1, from_integer/1, from_integer/2, from_integer/3,
-         to_integer/1, to_integer/2, from_float/1, to_float/1, from_number/1, to_number/1,
-         integer_to_hex_char/1, integer_to_hex_char/2, hex_char_to_integer/1,
-         get_line/1, urlencode/1, urldecode/1, xmlencode/1, xmldecode/1,
-         hexencode/1, hexdecode/1]).
+-export([ bstr/1
+        , chomp/1
+        , concat/2
+        , duplicate/2
+        , equal/2
+        , from_atom/1
+        , from_float/1
+        , from_integer/1
+        , from_integer/2
+        , from_integer/3
+        , from_list/1
+        , from_number/1
+        , get_line/1
+        , hex_char_to_integer/1
+        , hexdecode/1
+        , hexencode/1
+        , index/2
+        , insert/3
+        , integer_to_hex_char/1
+        , integer_to_hex_char/2
+        , is_alnum/1
+        , is_alpha/1
+        , is_atom_as_binary/1
+        , is_atom_char/1
+        , is_blank/1
+        , is_digit/1
+        , is_lower/1
+        , is_numeric/1
+        , is_space/1
+        , is_upper/1
+        , is_xdigit/1
+        , join/1
+        , join/2
+        , join/3
+        , left/2
+        , len/1
+        , lower/1
+        , lpad/2
+        , lpad/3
+        , lstrip/1
+        , lstrip/2
+        , member/2
+        , nth/2
+        , pad/2
+        , pad/3
+        , prefix/2
+        , right/2
+        , rindex/2
+        , rpad/2
+        , rpad/3
+        , rstrip/1
+        , rstrip/2
+        , split/2
+        , strip/1
+        , strip/2
+        , substr/2
+        , substr/3
+        , suffix/2
+        , to_atom/1
+        , to_boolean/1
+        , to_existing_atom/1
+        , to_float/1
+        , to_integer/1
+        , to_integer/2
+        , to_list/1
+        , to_number/1
+        , upper/1
+        , urldecode/1
+        , urlencode/1
+        , xmldecode/1
+        , xmlencode/1
+        ]).
 
 
 %% @doc  Return the length of a string.
