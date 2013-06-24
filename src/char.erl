@@ -6,13 +6,27 @@
 %%% @end
 %%%-------------------------------------------------------------------
 -module(char).
+
 -author('Juan Jose Comellas <juanjo@comellas.org>').
 -author('Mahesh Paolini-Subramanya <mahesh@aptela.com>').
 
--export([is_alpha/1, is_alnum/1, is_lower/1, is_upper/1, is_digit/1, is_xdigit/1,
-         is_blank/1, is_space/1, is_atom/1, lower/1, upper/1,
-         integer_to_hex/1, integer_to_hex/2, hex_to_integer/1,
-         must_urlencode/1, must_xmlencode/1]).
+-export([ hex_to_integer/1
+        , integer_to_hex/1
+        , integer_to_hex/2
+        , is_alnum/1
+        , is_alpha/1
+        , is_atom/1
+        , is_blank/1
+        , is_digit/1
+        , is_lower/1
+        , is_space/1
+        , is_upper/1
+        , is_xdigit/1
+        , lower/1
+        , must_urlencode/1
+        , must_xmlencode/1
+        , upper/1
+        ]).
 
 
 %% @doc Determines if a character is alphabetic.
