@@ -764,8 +764,7 @@ bstr(Integer) when is_integer(Integer), Integer > 0, Integer =< 255 ->
 bstr(Integer) when is_integer(Integer) ->
     from_integer(Integer);
 bstr(Float) when is_float(Float) ->
-    %% Use mochinum to avoid weird formatting by the Erlang float_to_list() BIF.
-    list_to_binary(mochinum:digits(Float));
+    from_float(Float);
 bstr(List) when is_list(List) ->
     list_to_binary(List).
 
@@ -810,13 +809,41 @@ to_boolean(<<"false">>) ->
 %% @doc Convert an integer to a bstr in base 10 format.
 -spec from_integer(integer()) -> binary().
 from_integer(I) ->
-    from_integer(I, 10, upper).
+    integer_to_binary(I).
 
 
 %% @doc Convert an integer to a bstr in base 'n' format.
--spec from_integer(integer(), 1..255) -> binary().
+%% -spec from_integer(integer(), 1..255) -> binary().
+from_integer(I, 10) ->
+    erlang:integer_to_binary(I);
+from_integer(I, Base)
+  when erlang:is_integer(I), erlang:is_integer(Base),
+       Base >= 2, Base =< 1+$Z-$A+10 ->
+    %% We can't use integer_to_binary/2 in versions <= R16B01 as the function
+    %% generates wrong output values in bases other than 10 for 0 and negative
+    %% integers.
+    if I < 0 ->
+	    <<$-,(from_integer1(-I, Base, <<>>))/binary>>;
+       true ->
+	    from_integer1(I, Base, <<>>)
+    end;
 from_integer(I, Base) ->
-    from_integer(I, Base, upper).
+    erlang:error(badarg, [I, Base]).
+
+%%     integer_to_binary(I, Base).
+%% integer_to_binary(I0, Base, R0) ->
+from_integer1(I0, Base, R0) ->
+    D = I0 rem Base,
+    I1 = I0 div Base,
+    R1 = if
+             D >= 10 -> <<(D-10+$A),R0/binary>>;
+             true -> <<(D+$0),R0/binary>>
+         end,
+    if
+        I1 =:= 0 -> R1;
+        true -> from_integer1(I1,Base,R1)
+    end.
+
 
 %% @doc Convert an integer to a bstr in base 'n' format in the specified case.
 -spec from_integer(integer(), 2..36, upper | lower) -> binary().
@@ -864,24 +891,8 @@ from_integer(I0, Base, BaseLetter, Acc) ->
 %% @doc Convert a bstr containing a string representing a decimal number
 %%      to an integer.
 -spec to_integer(binary()) -> integer().
-to_integer(<<$-, Str/binary>>) ->
-    -to_decimal_integer(Str, 0);
-to_integer(<<$+, Str/binary>>) ->
-    to_decimal_integer(Str, 0);
-to_integer(<<>>) ->
-    erlang:error(badarg);
 to_integer(Str) ->
-    to_decimal_integer(Str, 0).
-
-%% Part of the function converts the string into a base-10 number
-to_decimal_integer(<<Char, Tail/binary>>, Acc) when (Char >= $0) and (Char =< $9) ->
-    to_decimal_integer(Tail, Acc * 10 + (Char - $0));
-to_decimal_integer(<<Char, _Tail/binary>>, _Acc) ->
-    %% We throw the same exception thrown by list_to_integer() if a
-    %% non-numeric character is found
-    erlang:error(badarg, [Char]);
-to_decimal_integer(<<>>, Acc) ->
-    Acc.
+    binary_to_integer(Str).
 
 
 %% @doc Convert a bstr containing a string representing a positive number
@@ -889,63 +900,36 @@ to_decimal_integer(<<>>, Acc) ->
 %%      between 2 and 32.
 % Optimized version for base 10
 -spec to_integer(binary(), 1..255) -> integer().
-to_integer(Str, 10) ->
-    to_integer(Str);
-to_integer(_Str, Base) when not is_integer(Base); Base < 2; Base > ($Z - $A + 11) ->
-    erlang:error(badarg, [Base]);
-to_integer(<<$-, Tail/binary>>, Base) ->
-    -to_base_n_integer(Tail, Base, 0);
-to_integer(<<$+, Tail/binary>>, Base) ->
-    to_base_n_integer(Tail, Base, 0);
-to_integer(<<>>, _Base) ->
-    erlang:error(badarg);
 to_integer(Str, Base) ->
-    to_base_n_integer(Str, Base, 0).
+    binary_to_integer(Str, Base).
 
-
-% Generic version for the rest of the bases
-to_base_n_integer(<<Char, Tail/binary>>, Base, Acc) when Char >= $0, Char =< $9, Char < Base + $0 ->
-    to_base_n_integer(Tail, Base, Acc * Base + Char - $0);
-to_base_n_integer(<<Char, Tail/binary>>, Base, Acc) when Char >= $A, Char =< $Z, Char < Base + $A ->
-    to_base_n_integer(Tail, Base, Acc * Base + 10 + Char - $A);
-to_base_n_integer(<<Char, Tail/binary>>, Base, Acc) when Char >= $a, Char =< $z, Char < Base + $a ->
-    to_base_n_integer(Tail, Base, Acc * Base + 10 + Char - $a);
-to_base_n_integer(<<>>, _Base, Acc) ->
-    Acc;
-to_base_n_integer(<<Char, _Tail/binary>>, Base, _Acc) ->
-    %% We throw the same exception thrown by list_to_integer() if an
-    %% invalid character is found
-    erlang:error(badarg, [Char, Base]).
 
 %% @doc Convert a floating point number to a bstr.
 -spec from_float(float()) -> binary().
 from_float(Float) ->
-    %% Use mochinum to avoid weird formatting by the Erlang float_to_list() BIF.
-    list_to_binary(mochinum:digits(Float)).
+    float_to_binary(Float, [{decimals, 10}, compact]).
 
 
 %% @doc Convert a bstr formatted as a floating point number to a float.
 -spec to_float(binary()) -> float().
 to_float(Str) ->
-    list_to_float(binary_to_list(Str)).
+    binary_to_float(Str).
 
 
 %% @doc Convert an integer or floating point number into a bstr.
 -spec from_number(integer() | float()) -> binary().
+from_number(Number) when is_float(Number) ->
+    float_to_binary(Number, [{decimals, 10}, compact]);
 from_number(Number) ->
-    %% Use mochinum to avoid weird formatting by the Erlang float_to_list() BIF.
-    list_to_binary(mochinum:digits(Number)).
+    integer_to_binary(Number).
 
 
 %% @doc Convert a formatted binary into an integer or floating point number.
 -spec to_number(binary()) -> integer() | float().
 to_number(Str) ->
-    Number = << <<Char>> || <<Char>> <= Str, (char:is_digit(Char) orelse Char =:= $. orelse Char =:= $- orelse Char =:= $+) >>,
-    case member(Number, $.) of
-        true ->
-            list_to_float(binary_to_list(Number));
-        false ->
-            list_to_integer(binary_to_list(Str))
+    case member(Str, $.) of
+        true  -> binary_to_float(Str);
+        false -> binary_to_integer(Str)
     end.
 
 
@@ -1157,4 +1141,3 @@ hexdecode(<<_Char>>, _Acc) ->
     erlang:error(badarg);
 hexdecode(<<>>, Acc) ->
     Acc.
-

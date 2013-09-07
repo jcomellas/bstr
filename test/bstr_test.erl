@@ -19,7 +19,7 @@
                from_atom/1, to_atom/1, to_existing_atom/1, from_list/1, to_list/1,
                to_boolean/1, from_integer/1, from_integer/2, from_integer/3,
                to_integer/1, to_integer/2, from_float/1, to_float/1, from_number/1, to_number/1,
-               integer_to_hex_char/1, integer_to_hex_char/2, hex_char_to_integer/1, 
+               integer_to_hex_char/1, integer_to_hex_char/2, hex_char_to_integer/1,
                get_line/1, urlencode/1, urldecode/1, xmlencode/1, xmldecode/1,
                hexencode/1, hexdecode/1]).
 
@@ -636,9 +636,9 @@ from_integer_3_test() ->
 %%% Test for the from_float/1 function
 from_float_1_test() ->
     %% Positive integer
-    ?assertMatch(<<"12345">>, from_float(12345)),
+    ?assertMatch(<<"12345.0">>, from_float(12345.0)),
     %% Negative integer
-    ?assertMatch(<<"-12345">>, from_float(-12345)),
+    ?assertMatch(<<"-12345.0">>, from_float(-12345.0)),
     %% Floating point number
     ?assertMatch(<<"12345.67">>, from_float(12345.67)),
     %% Non-numeric string.
@@ -709,7 +709,7 @@ get_line_1_test() ->
     ?assertMatch({<<"ABCDEF">>, <<"GHIJKL\r\nMNOPQR">>}, get_line(Str11)),
     Str12 = <<"ABCDEF\r\nGHIJKL\nMNOPQR">>,
     ?assertMatch({<<"ABCDEF">>, <<"GHIJKL\nMNOPQR">>}, get_line(Str12)).
-    
+
 %%% Test for the urlencode/1 function
 urlencode_1_test() ->
     %% Unreserved characters (lower case letters)
@@ -777,10 +777,10 @@ xmlencode_1_test() ->
     %% Empty string
     ?assert(xmlencode(<<>>) =:= <<>>),
     %% Characters that are not encoded: lower case letters
-    ?assertMatch(<<"abcdefghijklmnopqrstuvwxyz">>, 
+    ?assertMatch(<<"abcdefghijklmnopqrstuvwxyz">>,
                  xmlencode(<<"abcdefghijklmnopqrstuvwxyz">>)),
     %% Characters that are not encoded: upper case letters
-    ?assertMatch(<<"ABCDEFGHIJKLMNOPQRSTUVWXYZ">>, 
+    ?assertMatch(<<"ABCDEFGHIJKLMNOPQRSTUVWXYZ">>,
                  xmlencode(<<"ABCDEFGHIJKLMNOPQRSTUVWXYZ">>)),
     %% Characters that are not encoded: numbers and symbols
     ?assertMatch(<<"01234567890-_.~">>, xmlencode(<<"01234567890-_.~">>)),
@@ -792,11 +792,11 @@ xmlencode_1_test() ->
                   "&#x10;&#x11;&#x12;&#x13;&#x14;&#x15;&#x16;&#x17;"
                   "&#x18;&#x19;&#x1A;&#x1B;&#x1C;&#x1D;&#x1E;&#x1F;">>,
                  xmlencode(<<0,  1,  2,  3,  4,  5,  6,  7,
-                             8,  9, 10, 11, 12, 13, 14, 15, 
-                            16, 17, 18, 19, 20, 21, 22, 23, 
+                             8,  9, 10, 11, 12, 13, 14, 15,
+                            16, 17, 18, 19, 20, 21, 22, 23,
                             24, 25, 26, 27, 28, 29, 30, 31>>)),
     %% Text with embedded spaces
-    ?assertMatch(<<"&lt;element attr=&quot;1234&quot;/&gt;">>, 
+    ?assertMatch(<<"&lt;element attr=&quot;1234&quot;/&gt;">>,
                  xmlencode(<<"<element attr=\"1234\"/>">>)).
 
 %%% Test for the xmldecode/1 function
@@ -804,10 +804,10 @@ xmldecode_1_test() ->
     %% Empty string
     ?assert(xmldecode(<<>>) =:= <<>>),
     %% Characters that are not encoded: lower case letters
-    ?assertMatch(<<"abcdefghijklmnopqrstuvwxyz">>, 
+    ?assertMatch(<<"abcdefghijklmnopqrstuvwxyz">>,
                  xmldecode(<<"abcdefghijklmnopqrstuvwxyz">>)),
     %% Characters that are not encoded: upper case letters
-    ?assertMatch(<<"ABCDEFGHIJKLMNOPQRSTUVWXYZ">>, 
+    ?assertMatch(<<"ABCDEFGHIJKLMNOPQRSTUVWXYZ">>,
                  xmldecode(<<"ABCDEFGHIJKLMNOPQRSTUVWXYZ">>)),
     %% Characters that are not encoded: numbers and symbols
     ?assertMatch(<<"01234567890-_.~">>, xmldecode(<<"01234567890-_.~">>)),
@@ -815,15 +815,15 @@ xmldecode_1_test() ->
     ?assertMatch(<<"&<>'\"">>, xmldecode(<<"&amp;&lt;&gt;&apos;&quot;">>)),
     %% Non-printable characters
     ?assertMatch(<<0,  1,  2,  3,  4,  5,  6,  7,
-                   8,  9, 10, 11, 12, 13, 14, 15, 
-                  16, 17, 18, 19, 20, 21, 22, 23, 
+                   8,  9, 10, 11, 12, 13, 14, 15,
+                  16, 17, 18, 19, 20, 21, 22, 23,
                   24, 25, 26, 27, 28, 29, 30, 31>>,
                  xmldecode(<<"&#x00;&#x01;&#x02;&#x03;&#x04;&#x05;&#x06;&#x07;"
                             "&#x08;&#x09;&#x0A;&#x0B;&#x0C;&#x0D;&#x0E;&#x0F;"
                             "&#x10;&#x11;&#x12;&#x13;&#x14;&#x15;&#x16;&#x17;"
                             "&#x18;&#x19;&#x1A;&#x1B;&#x1C;&#x1D;&#x1E;&#x1F;">>)),
     %% Text with embedded spaces
-    ?assertMatch(<<"<element attr=\"1234\"/>">>, 
+    ?assertMatch(<<"<element attr=\"1234\"/>">>,
                  xmldecode(<<"&lt;element attr=&quot;1234&quot;/&gt;">>)),
     %% Invalid encoding
     ?assertMatch(<<"**&abc;**">>, xmldecode(<<"**&abc;**">>)).
@@ -864,4 +864,3 @@ hexdecode_1_test() ->
     %% Alphabetic (lower case) letters
     ?assertMatch(<<"abcdefghijklmnopqrstuvwxyz">>,
                  hexdecode(<<"6162636465666768696a6b6c6d6e6f707172737475767778797a">>)).
-
