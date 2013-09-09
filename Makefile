@@ -26,14 +26,8 @@ depclean:
 distclean:
 	@./rebar delete-deps
 
-build-plt: compile
-	@./rebar build-plt
-
-check-plt: compile
-	@./rebar check-plt
-
 dialyze: compile
-	@./rebar dialyze
+	@dialyzer -r .
 
 test:
 	@./rebar skip_deps=true eunit
