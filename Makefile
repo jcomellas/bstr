@@ -8,6 +8,11 @@ TEST_EPATH := -pa .eunit -pz deps/mochiweb/ebin
 
 all: compile
 
+travis_ci: \
+	bootstrap \
+	compile \
+	test
+
 bootstrap:
 	@./rebar get-deps
 

@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/ibnfirnas/bstr.svg?branch=master)](https://travis-ci.org/ibnfirnas/bstr)
+
+
 bstr
 ====
 
