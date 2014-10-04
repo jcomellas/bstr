@@ -9,9 +9,14 @@ Erlang library to use binaries as strings.
 
 Requirements
 ------------
+Tested on the following OTP releases:
 
-You should only need a somewhat recent version of Erlang/OTP, though the module
-has only been tested with Erlang R13B and R14B.
+- 17.1
+- 17.0
+- R16B03-1
+- R16B03
+- R16B02
+- R16B01
 
 
 Installation
