@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ibnfirnas/bstr.svg?branch=master)](https://travis-ci.org/ibnfirnas/bstr)
+[![Build Status](https://travis-ci.org/jcomellas/bstr.svg?branch=master)](https://travis-ci.org/jcomellas/bstr)
 
 
 bstr

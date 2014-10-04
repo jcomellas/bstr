@@ -1,6 +1,6 @@
 notifications:
     recipients:
-    - siraaj@khandkar.net
+    - juanjo@comellas.org
 
 language:
     erlang
