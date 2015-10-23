@@ -1,8 +1,11 @@
 {application, bstr,
  [
-  {description, "Erlang library to use binaries as strings"},
-  {vsn, "0.2.0"},
+  {description, "Erlang library that uses binaries as strings"},
+  {vsn, "0.3.0"},
   {registered, []},
   {applications, [kernel, stdlib]},
-  {env, []}
+  {env, []},
+  {maintainers, ["Juan Jose Comellas"]},
+  {licenses, ["BSD"]},
+  {links, [{"Github", "https://github.com/jcomellas/bstr"}]}  
  ]}.
