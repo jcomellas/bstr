@@ -7,5 +7,5 @@
   {env, []},
   {maintainers, ["Juan Jose Comellas"]},
   {licenses, ["BSD"]},
-  {links, [{"Github", "https://github.com/jcomellas/bstr"}]}  
+  {links, [{"GitHub", "https://github.com/jcomellas/bstr"}]}  
  ]}.
